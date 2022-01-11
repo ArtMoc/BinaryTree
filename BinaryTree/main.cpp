@@ -50,10 +50,26 @@ public:
 	{
 		return maxValue(this->Root);
 	}
+	int count()const
+	{
+		return count(this->Root);
+	}
+	int sum()const
+	{
+		return sum(this->Root);
+	}
+	double avg()const
+	{
+		return avg(this->Root);
+	}
 	void print()const
 	{
 		print(this->Root);
 		cout << endl;
+	}
+	void clear()
+	{
+		clear(this->Root);
 	}
 
 private:
@@ -90,12 +106,35 @@ private:
 		return Root->pRight ? maxValue(Root->pRight) : Root->Data;
 	}
 
+	int count(Element* Root)const
+	{
+		/*if (Root == nullptr)return 0;
+		return count(Root->pLeft) + count(Root->pRight) + 1;*/
+		return Root == nullptr ? 0 : count(Root->pLeft) + count(Root->pRight) + 1;
+	}
+	int sum(Element* Root)const
+	{
+		return Root ? sum(Root->pLeft) + sum(Root->pRight) + Root->Data : 0;
+	}
+	double avg(Element* Root)const
+	{
+		return double(sum(Root)) / count(Root);
+	}
+
 	void print(Element* Root)const
 	{
 		if (Root == nullptr)return;
 		print(Root->pLeft);
 		cout << Root->Data << tab;
 		print(Root->pRight);
+	}
+
+	void clear(Element* Root)
+	{
+		if (Root == nullptr)return;
+		clear(Root->pLeft);
+		clear(Root->pRight);
+		delete Root;
 	}
 };
 
@@ -113,4 +152,9 @@ void main()
 	cout << endl;
 	cout << "Минимальное значение в дереве: " << tree.minValue() << endl;
 	cout << "Максимальное значение в дереве: " << tree.maxValue() << endl;
+	cout << "Количество элементов в дереве: " << tree.count() << endl;
+	cout << "Сумма элементов в дереве: " << tree.sum() << endl;
+	cout << "Среднее значение элементов в дереве: " << tree.avg() << endl;
+	tree.clear();
+	tree.print();
 }
