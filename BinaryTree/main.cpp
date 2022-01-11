@@ -129,12 +129,13 @@ private:
 		print(Root->pRight);
 	}
 
-	void clear(Element* Root)
+	void clear(Element*& Root)
 	{
 		if (Root == nullptr)return;
 		clear(Root->pLeft);
 		clear(Root->pRight);
 		delete Root;
+		Root = nullptr;
 	}
 };
 
