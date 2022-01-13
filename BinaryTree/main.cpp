@@ -2,7 +2,7 @@
 using std::cin;
 using std::cout;
 using std::endl;
-#define tab "\t"
+#define tab "   "
 
 class Tree
 {
@@ -43,11 +43,53 @@ public:
 	{
 		for (int i : il)insert(i, Root);
 	}
+	Tree(const Tree& other) : Tree()
+	{
+		cout << "T_Copy_Constructor:\t" << this << endl;
+		*this = other;
+	}
+	Tree(Tree&& other)
+	{
+		this->Root = other.Root;
+		cout << "T_Move_Constructor:\t" << this << endl;
+		other.Root = nullptr;
+	}
 	~Tree()
 	{
+		clear(Root);
 		cout << "T_Destructor:\t" << this << endl;
 		cout << "\n----------------------------------\n";
 	}
+
+	Tree& operator=(const Tree& other)
+	{
+		if (this != &other)
+		{
+			this->clear();
+			Element* Root = other.Root;
+			Copy(Root);
+		}
+		cout << "T_Copy_Assignment:\t" << this << endl;
+		return *this;
+	}
+	Tree& operator=(Tree&& other)
+	{
+		this->Root = other.Root;
+		other.Root = nullptr;
+		cout << "T_Move_Assignment:\t" << this << endl;
+		return *this;
+	}
+	void Copy(Element* Root)
+	{
+		if (Root != nullptr)
+		{
+			this->insert(Root->Data);
+			Copy(Root->pLeft);
+			Copy(Root->pRight);
+		}
+	}
+
+	
 
 	void insert(int Data)
 	{
@@ -77,17 +119,32 @@ public:
 	{
 		return avg(this->Root);
 	}
+	int depth()const
+	{
+		return depth(this->Root);
+	}
 	void print()const
 	{
 		print(this->Root);
 		cout << endl;
 	}
+	void print(int depth)const
+	{
+		print(this->Root, depth);
+		cout << endl;
+	}
+	void tree_print()
+	{
+		tree_print(0);
+	}
+
 	void clear()
 	{
 		clear(this->Root);
 	}
 
 private:
+	
 	void insert(int Data, Element* Root)
 	{
 		//Root - корень поддерева
@@ -166,7 +223,13 @@ private:
 	{
 		return double(sum(Root)) / count(Root);
 	}
-
+	int depth(Element* Root)const
+	{
+		if (Root == nullptr)return 0;
+		else return
+			depth(Root->pLeft) + 1 > depth(Root->pRight) + 1 ?
+			depth(Root->pLeft) + 1 : depth(Root->pRight) + 1;
+	}
 	void print(Element* Root)const
 	{
 		if (Root == nullptr)return;
@@ -174,6 +237,21 @@ private:
 		cout << Root->Data << tab;
 		print(Root->pRight);
 	}
+	void print(Element* Root, int depth)const
+	{
+		if (Root == nullptr || depth == -1)return;
+		if (depth == 1 && Root->pLeft == nullptr)cout << "  " << tab;
+		print(Root->pLeft, depth - 1);
+		cout << tab;
+
+		if (depth == 0)cout << Root->Data /*<< tab*/;
+
+		if (depth == 1 && Root->pRight == nullptr)cout << "  " << tab;
+		print(Root->pRight, depth - 1);
+		cout << tab;
+	}
+
+
 
 	void clear(Element*& Root)
 	{
@@ -182,6 +260,16 @@ private:
 		clear(Root->pRight);
 		delete Root;
 		Root = nullptr;
+	}
+
+	void tree_print(int depth)
+	{
+		if (depth==this->depth())return;
+		for (int i = 0; i < (this->depth() - depth)*2; i++)cout << tab;
+		print(depth);
+		for (int i = 0; i < (this->depth() - depth)*2; i++)cout << tab;
+		cout << endl;
+		tree_print(depth + 1);
 	}
 };
 
@@ -214,7 +302,7 @@ public:
 };
 
 //#define BASE_CHECK
-
+//#define COPY_MOVE
 void main()
 {
 	setlocale(LC_ALL, "Rus");
@@ -254,12 +342,29 @@ void main()
 	u_tree.print();
 #endif // BASE_CHECK
 
-	Tree tree = { 50, 25, 75, 16, 32, 64, 80, 8, 11, 48, 77, 85 };
+	Tree tree = { 50, 25, 75, 16, 32, 64, 80, 8, 18, 48, 77, 85 };
 	tree.print();
 	int value;
-	cout << "Введите удаляемое значение: "; cin >> value;
+	/*cout << "Введите удаляемое значение: "; cin >> value;
 	tree.erase(value);
 	tree.print();
-	tree.clear();
-	tree.print();
+	tree.print();*/
+
+#ifdef COPY_MOVE
+	Tree tree1;
+	for (int i = 0; i < 10; i++)
+	{
+		tree1.insert(rand() % 100);
+	}
+	tree1.print();
+	Tree tree2 = tree1;
+	tree2.print();
+	Tree tree3;
+	tree3 = tree2;
+	tree3.print();
+#endif // COPY_MOVE
+
+	cout << "Глубина дерева: " << tree.depth() << endl;
+	//tree.print(3);
+	tree.tree_print();
 }
