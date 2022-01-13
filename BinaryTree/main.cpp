@@ -246,9 +246,10 @@ private:
 
 		if (depth == 0)cout << Root->Data /*<< tab*/;
 
+		for (int i = 0; i < (this->depth() - depth)/4; i++)cout << tab;
 		if (depth == 1 && Root->pRight == nullptr)cout << "  " << tab;
 		print(Root->pRight, depth - 1);
-		cout << tab;
+		//cout << tab;
 	}
 
 
@@ -266,8 +267,9 @@ private:
 	{
 		if (depth==this->depth())return;
 		for (int i = 0; i < (this->depth() - depth)*2; i++)cout << tab;
+
 		print(depth);
-		for (int i = 0; i < (this->depth() - depth)*2; i++)cout << tab;
+		for (int i = 0; i < (this->depth() - depth)*4; i++)cout << tab;
 		cout << endl;
 		tree_print(depth + 1);
 	}
