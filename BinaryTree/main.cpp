@@ -6,6 +6,7 @@ using std::endl;
 
 class Tree
 {
+protected:
 	class Element
 	{
 		int Data;
@@ -21,7 +22,12 @@ class Tree
 		{
 			cout << "E_Destructor:\t" << this << endl;
 		}
+		bool is_leaf()const
+		{
+			return pLeft == pRight;
+		}
 		friend class Tree;
+		friend class UniqueTree;
 	}*Root; //Корень дерева
 public:
 	Element* getRoot()const
@@ -33,14 +39,23 @@ public:
 		Root = nullptr;
 		cout << "T_Construcotr:\t" << this << endl;
 	}
+	Tree(const std::initializer_list<int>& il) :Tree()
+	{
+		for (int i : il)insert(i, Root);
+	}
 	~Tree()
 	{
 		cout << "T_Destructor:\t" << this << endl;
+		cout << "\n----------------------------------\n";
 	}
 
 	void insert(int Data)
 	{
 		insert(Data, this->Root);
+	}
+	void erase(int Data)
+	{
+		erase(Data, Root);
 	}
 	int minValue()const
 	{
@@ -92,6 +107,35 @@ private:
 			else insert(Data, Root->pRight);
 		}
 	}
+	void erase(int Data, Element*& Root)
+	{
+		if (Root == nullptr)return;
+		erase(Data, Root->pLeft);
+		erase(Data, Root->pRight);
+		if (Data == Root->Data)
+		{
+			if (Root->is_leaf()) //Если элемент является листком, его можно удалять
+			{
+				delete Root;
+				Root = nullptr;
+			}
+			else
+			{
+				if (count(Root->pLeft) > count(Root->pRight))
+				{
+					Root->Data = maxValue(Root->pLeft);//Заменяем значение удаляемого 
+												   //элемента макс. значением в
+												   //левой ветке
+					erase(maxValue(Root->pLeft), Root->pLeft);
+				}
+				else
+				{
+					Root->Data = minValue(Root->pRight);
+					erase(minValue(Root->pRight), Root->pRight);
+				}
+			}
+		}
+	}
 
 	int minValue(Element* Root)const
 	{
@@ -110,7 +154,9 @@ private:
 	{
 		/*if (Root == nullptr)return 0;
 		return count(Root->pLeft) + count(Root->pRight) + 1;*/
-		return Root == nullptr ? 0 : count(Root->pLeft) + count(Root->pRight) + 1;
+		//return Root == nullptr ? 0 : count(Root->pLeft) + count(Root->pRight) + 1;
+		//return Root ? count(Root->pLeft) + count(Root->pRight) + 1 : 0;
+		return !Root ? 0 : count(Root->pLeft) + count(Root->pRight) + 1;
 	}
 	int sum(Element* Root)const
 	{
@@ -139,9 +185,41 @@ private:
 	}
 };
 
+class UniqueTree : public Tree
+{
+	void insert(int Data, Element* Root)
+	{
+		//Root - корень поддерева
+		//this->Root - корень всего дерева
+		if (this->Root == nullptr)this->Root = new Element(Data);
+		if (Root == nullptr)return;
+		if (Data < Root->Data)
+		{
+			if (Root->pLeft == nullptr)Root->pLeft = new Element(Data);//Если есть место
+				//для добавления элемента, добавляем элемент прямо сюда.
+			else insert(Data, Root->pLeft);// в противном же случае идем налево и ищем 
+				//место куда добавить добавить элемент. 
+		}
+		else if(Data>Root->Data)
+		{
+			if (Root->pRight == nullptr)Root->pRight = new Element(Data);
+			else insert(Data, Root->pRight);
+		}
+	}
+public:
+	void insert(int Data)
+	{
+		insert(Data, Root);
+	}
+};
+
+//#define BASE_CHECK
+
 void main()
 {
 	setlocale(LC_ALL, "Rus");
+
+#ifdef BASE_CHECK
 	int n;
 	cout << "Введите количество элементов: "; cin >> n;
 	Tree tree;
@@ -156,6 +234,32 @@ void main()
 	cout << "Количество элементов в дереве: " << tree.count() << endl;
 	cout << "Сумма элементов в дереве: " << tree.sum() << endl;
 	cout << "Среднее значение элементов в дереве: " << tree.avg() << endl;
+
+
+	UniqueTree u_tree;
+	for (int i = 0; i < n; i++)
+	{
+		u_tree.insert(rand() % 100);
+	}
+	u_tree.print();
+	cout << "Минимальное значение в дереве: " << u_tree.minValue() << endl;
+	cout << "Максимальное значение в дереве: " << u_tree.maxValue() << endl;
+	cout << "Количество элементов в дереве: " << u_tree.count() << endl;
+	cout << "Сумма элементов в дереве: " << u_tree.sum() << endl;
+	cout << "Среднее значение элементов в дереве: " << u_tree.avg() << endl;
+
+	tree.clear();
+	u_tree.clear();
+	tree.print();
+	u_tree.print();
+#endif // BASE_CHECK
+
+	Tree tree = { 50, 25, 75, 16, 32, 64, 80, 8, 11, 48, 77, 85 };
+	tree.print();
+	int value;
+	cout << "Введите удаляемое значение: "; cin >> value;
+	tree.erase(value);
+	tree.print();
 	tree.clear();
 	tree.print();
 }
